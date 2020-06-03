@@ -78,8 +78,6 @@ void BasicTutorial_00::chooseSceneManager()
 {
 	mSceneMgrArr[0] = mRoot
 		->createSceneManager(ST_GENERIC, "primary");
-	//mSceneMgrArr[1] = mRoot
-	//	->createSceneManager(ST_GENERIC, "secondary");createViewport_01
     //
     // add your own stuff
     //
@@ -183,20 +181,6 @@ void BasicTutorial_00::createScene_00(void)
 	bigBallEntity = sphere5;
 	smallBallEntity = sphere6;
 	smallBallSceneNode = snode4;
-
-	//mSceneMgr->setAmbientLight(ColourValue(1,1,1));
-
-    /*
-    Radian angle(3.141952654/2.0);
-
-    Vector3 axis(1.0, 0.0, 0.0);
-    mSceneMgr
-		->getRootSceneNode()
-		->createChildSceneNode(
-            Vector3(0.0, 0.0, -750.0),
-            Quaternion( angle, axis))
-		->attachObject(ent);
-    */
 
 	Entity *sphere7 = mSceneMgr->createEntity("sphere4", Ogre::SceneManager::PT_SPHERE);
 	SceneNode *snode5 = mSceneMgr->getRootSceneNode()->createChildSceneNode();
@@ -446,19 +430,11 @@ bool BasicTutorial_00::frameStarted(const Ogre::FrameEvent& evt)
 
 	collisionTest();
 	
-	//penguinSeneNode->rotate(Vector3::UNIT_Y, Degree(0.2));
 	penguinSeneNode->yaw(Degree(.2));
 	testSceneNode->yaw(Degree(.05));
 	testSceneNode2->pitch(Degree(.05));
 
-	//bigballVelocity.y = bigballVelocity.y + bGravity.y*evt.timeSinceLastFrame;
-	//smallballVelocity.y = smallballVelocity.y + sGravity.y*evt.timeSinceLastFrame;
-	
-	//smallballVelocity.x = smallballVelocity.x + smallballAcceleration.x * evt.timeSinceLastFrame;
-	//smallballVelocity.z = smallballVelocity.z + smallballAcceleration.z * evt.timeSinceLastFrame;	
-
 	bigballPosition = bigballPosition + bigballVelocity*evt.timeSinceLastFrame;
-	//smallballPosition = smallballPosition + smallballVelocity*evt.timeSinceLastFrame;
 	
 	bigBallSceneNode->setPosition(bigballPosition);
 	for (int i = 0; i < ballNum; i++)
@@ -490,7 +466,6 @@ void BasicTutorial_00::createPlane(void)
 	);
 
 	Entity *floorEnt = mSceneMgr->createEntity("floor1");
-	//floorEnt->setMaterialName("Examples/green");
 
 	SceneNode *fnode = mSceneMgr->getRootSceneNode()->createChildSceneNode();
 	
@@ -514,7 +489,6 @@ void BasicTutorial_00::createPlane87(void)
 	);
 
 	Entity *floorEnt = mSceneMgr87->createEntity("floor2");
-	//floorEnt->setMaterialName("Examples/green");
 
 	SceneNode *fnode = mSceneMgr87->getRootSceneNode()->createChildSceneNode();
 
@@ -754,7 +728,6 @@ void BasicTutorial_00::toggleView(void)
 void BasicTutorial_00::changeViewPosition(void)
 {
 	if (change2 == false&& change == false) {
-		//mWindow->removeViewport(mViewportArr[0]->getZOrder());
 		mWindow->removeViewport(mViewportArr[1]->getZOrder());
 
 		mCamera = mCameraArr[1];
@@ -767,7 +740,6 @@ void BasicTutorial_00::changeViewPosition(void)
 	}
 	else if(change2 == true && change == false)
 	{
-		//mWindow->removeViewport(mViewportArr[0]->getZOrder());
 		mWindow->removeViewport(mViewportArr[1]->getZOrder());
 
 
@@ -781,7 +753,6 @@ void BasicTutorial_00::changeViewPosition(void)
 	}
 	else if (change2 == false && change == true)
 	{
-		//mWindow->removeViewport(mViewportArr[0]->getZOrder());
 		mWindow->removeViewport(mViewportArr[1]->getZOrder());
 
 		mCamera = mCameraArr[0];
@@ -794,7 +765,6 @@ void BasicTutorial_00::changeViewPosition(void)
 	}
 	else if (change2 == true && change == true)
 	{
-		//mWindow->removeViewport(mViewportArr[0]->getZOrder());
 		mWindow->removeViewport(mViewportArr[1]->getZOrder());
 
 		mCamera = mCameraArr[0];
@@ -851,116 +821,35 @@ void BasicTutorial_00::createBall(void)
 	}
 }
 
-void BasicTutorial_00::collisionTest(void) 
+void BasicTutorial_00::collisionTest(void)
 {
-	//AxisAlignedBox bigBox = bigBallSceneNode->_getWorldAABB();
-	//AxisAlignedBox planeBox = planeSceneNode->_getWorldAABB();
-	//AxisAlignedBox smallBox = smallBallSceneNode->_getWorldAABB();	
+	// bigball to smallball
+	for (int i = 0; i < ballNum; i++)
+	{
+		Vector3 dv = ballSceneNode[i]->getPosition() - bigballPosition;
+		float d = sqrt(dv.x*dv.x + dv.y*dv.y + dv.z*dv.z);
+		float w = bigBallEntity->getBoundingRadius() + ballEntity[i]->getBoundingRadius() - d;
 
-	/*if(bigBox.intersects(planeBox))
-	{
-		bigballVelocity.y = 0;
-		bGravity.y = 0;
-	}
-	else
-	{
-		bGravity.y = -980;
+		if (w > 0)
+			ballPosition[i] += dv / d * w;
 	}
 
-
-	if (smallBox.intersects(planeBox))
+	// smallball to smallball
+	for (int i = 0; i < ballNum; i++)
 	{
-		smallballVelocity.y = 0;
-		sGravity.y = 0;
-	}
-	else
-	{
-		sGravity.y = -980;
-	}
-
-	if (smallBox.intersects(bigBox))
-	{
-		F = 0.5 * bigBallMass * speed * speed;
-
-		ballToBallVector = smallballPosition - bigballPosition;
-
-		cosBall = (ballToBallVector.x * bigballVelocity.x + ballToBallVector.z * bigballVelocity.z) / (sqrt(pow(ballToBallVector.x, 2) + pow(ballToBallVector.z, 2)) * sqrt(pow(bigballVelocity.x, 2) + pow(bigballVelocity.z, 2)));
-
-		smallballAcceleration = ((F * cosBall) / smallBallMass) * ballToBallVector * 0.001;
-
-	}
-	else
-	{
-		//sGravity.y = -980;
-	}*/
-
-	for(int i = 0; i<ballNum;i++)
-	{
-		//SphereSceneQuery *pQuery = mSceneMgr->createSphereQuery(Sphere(ballSceneNode[i]->getPosition(), ballEntity[i]->getBoundingRadius()));
-
-		//SceneQueryResult qResult = pQuery->execute();
-
-		//for (SceneQueryResultMovableList::iterator iter = qResult.movables.begin(); iter != qResult.movables.end(); iter++)
-		//{
-		//	MovableObject *pObject = static_cast<MovableObject*>(*iter);		
-
-		//	if (pObject)
-		//	{
-		//		if (pObject->getMovableType() == "Entity")
-		//		{
-					//Entity *ent = static_cast<Entity*>(pObject);
-
-
-
-		//			if (ent->getName() == "sphere2")
-		//			{
-
-						Vector3 dv = bigballPosition - ballSceneNode[i]->getPosition();
-						float d = sqrt(dv.x*dv.x + dv.y*dv.y + dv.z*dv.z);
-						float w = bigBallEntity->getBoundingRadius() + ballEntity[i]->getBoundingRadius() - d;
-
-						if (w > 0)
-							ballPosition[i] = ballPosition[i] + (-(bigballPosition - ballPosition[i]) / d) * w;
-		//			}
-
-		//			if (ent->getName().find("ball")==0 && ent->getName() != ballEntity[i]->getName())
-		//			{
-
-		//				Vector3 dv = ent->getParentSceneNode()->getPosition() - ballSceneNode[i]->getPosition();
-		//				float d = sqrt(dv.x*dv.x + dv.y*dv.y + dv.z*dv.z);
-		//				float w = ent->getBoundingRadius() + ballEntity[i]->getBoundingRadius() - d;
-
-		//				if (w > 0)
-		//				{
-
-		//					ballPosition[i] = ballPosition[i] + (-(ent->getParentSceneNode()->getPosition() - ballPosition[i]) / d) * w ;
-						
-		//				}
-
-		//			}
-									
-		//		}
-		//	}
-		//}
-
-		for(int j = 0 ; j < ballNum ; j++)
+		for (int j = i + 1; j < ballNum; j++)
 		{
-			if(i!=j)
+
+			Vector3 dv = ballSceneNode[j]->getPosition() - ballSceneNode[i]->getPosition();
+			float d = sqrt(dv.x*dv.x + dv.y*dv.y + dv.z*dv.z);
+			float w = ballEntity[j]->getBoundingRadius() + ballEntity[i]->getBoundingRadius() - d;
+
+			if (w > 0)
 			{
-				Vector3 dv = ballSceneNode[j]->getPosition() - ballSceneNode[i]->getPosition();
-							float d = sqrt(dv.x*dv.x + dv.y*dv.y + dv.z*dv.z);
-								float w = ballEntity[j]->getBoundingRadius() + ballEntity[i]->getBoundingRadius() - d;
-
-								if (w > 0)
-								{
-
-								ballPosition[j] = ballPosition[j] + ((ballSceneNode[j]->getPosition() - ballPosition[i]) / d) * w ;
-
-								}
+				ballPosition[j] += dv / d * w * 0.5f;
+				ballPosition[i] -= dv / d * w * 0.5f;
 			}
+
 		}
-
-
-
 	}
 }
